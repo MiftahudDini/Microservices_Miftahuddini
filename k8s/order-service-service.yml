@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+spec:
+  selector:
+    app: order-service
+  ports:
+  - port: 8082
+    targetPort: 8082
+    protocol: TCP
+  type: ClusterIP
+
+
+File payment-service-deployment.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  labels:
+    app: payment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+      - name: payment-service
+        image: yourrepo/payment-service:latest
+        ports:
+        - containerPort: 8083
+        env:
+        - name: spring.application.name
+          value: "payment-service"
+        - name: eureka.client.service-url.defaultZone
+          value: "http://eurekaserver:8761/eureka/"
+        - name: spring.datasource.url
+          value: "jdbc:mysql://mysql:3306/dbecommerce_payment?useSSL=false&serverTimezone=UTC"
+        - name: spring.datasource.username
+          value: "root"
+        - name: spring.datasource.password
+          value: "root_password"
